@@ -54,8 +54,11 @@ public class Main {
                 tokenStr
         );
 
-        final String lexerStr = LexerGenerator
-                .generate(regex.replace("\\", "\\\\"), prefix);
+//        final String lexerStr = LexerGenerator
+//                .generate(regex.replace("\\", "\\\\"), prefix);
+
+        final String lexerStr = LexerGenerator.gen(prefix);
+
 
         Files.writeString(
                 Path.of(dirPath + prefix + "LexicalAnalyzer.java"),
