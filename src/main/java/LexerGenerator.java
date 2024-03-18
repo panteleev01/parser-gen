@@ -4,11 +4,6 @@ import java.util.Map;
 
 public class LexerGenerator {
 
-//    private static StringBuilder res = new StringBuilder();
-//    private static String prefix;
-//    private static String className;
-//    private static String tokenName;
-
     private final static String LEXER_TEMPLATE = """
             import java.text.ParseException;
             import java.util.regex.Pattern;
