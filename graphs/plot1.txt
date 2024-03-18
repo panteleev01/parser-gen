@@ -1,0 +1,5 @@
+graph G {ID71702312040 [label="lambda"]
+args [label="args"]ID98903022812 [label="10"]
+ID71702312040 -- args
+ID71702312040 -- ID98903022812
+}

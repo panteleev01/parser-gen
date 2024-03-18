@@ -1,0 +1,32 @@
+main> e;
+
+e() : Integer = t eTail($t0$) #mul { return eTail1; } ;
+
+eTail(Integer head) : Integer = PLUS t eTail($head+t1$) #name { return eTail2; } |
+    MINUS t eTail($head-t4$) #name { return eTail5; } |
+    EPS #eps { return head; };
+
+t() : Integer = f tTail($f0$) #mul { return tTail1; } ;
+
+tTail(Integer head  ) : Integer = MUL f tTail($head*f1$) #name { return tTail2; } |
+    DIV f tTail($head/f4$) #name { return tTail5; } |
+    EPS #eps { return head; };
+
+f() : Integer = N #number { return Integer.parseInt(N0); } |
+    MINUS N #negative { return -Integer.parseInt(N2); } |
+    O e C #par { return e4; } |
+    SO e COMMA e SC #coef { return fact(e7) / fact(e9) / fact(e7-e9); } ;
+
+
+token>++ COMMA : $,$;
+token>++ SO : $[$;
+token>++ SC : $]$;
+
+token>++ EPS : $eps$;
+token>++ N : $[0-9]+$;
+token>++ MINUS : $-$;
+token>++ PLUS : $+$;
+token>++ MUL : $*$;
+token>++ DIV : $/$;
+token>++ O : $($;
+token>++ C : $)$;

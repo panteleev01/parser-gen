@@ -1,0 +1,41 @@
+main> main;
+
+e() : Node = t eTail($t0$) #mul { return eTail1; } ;
+eTail(Node head) : Node = PLUS t eTail($new Node(head,t1,"add")$) #name { return eTail2; } |
+    MINUS t eTail($new Node(head, t4, "sub")$) #name { return eTail5; } |
+    EPS #eps { return head; };
+
+t() : Node = f tTail($f0$) #mul { return tTail1; } ;
+
+tTail(Node head) : Node = MUL f tTail($new Node(head, f1, "mul")$) #name { return tTail2; } |
+    DIV f tTail($new Node(head, f4, "div")$) #name { return tTail5; } |
+    EPS #eps { return head; };
+
+f() : Node = N #number { return new Node(N0); } |
+    MINUS N #negative { return new Node("-" + N2); } |
+    O e C #par { return e4; } |
+    VARNAME #varname { return new Node(VARNAME6); } ;
+
+
+main() : Lambda = LAMBDA names($new Args()$) SEMICOLON e() #lambda { return new Lambda(names1, e3); };
+names(Args args) : Args = VARNAME namestail($args.add(VARNAME0)$) #notEmpty { return namestail1; }
+                                                | EPS #empty { return args; };
+
+namestail(Args args): Args = COMMA VARNAME namestail($args.add(VARNAME1)$) #notEmpty { return namestail2; }
+                                            | EPS #empty { return args; };
+
+
+token>++ LAMBDA : $LAMBDA$;
+token>++ SEMICOLON : $:$;
+token>++ VARNAME : $[a-z]+$;
+token>++ COMMA : $,$;
+
+
+token>++ EPS : $eps$;
+token>++ N : $[0-9]+$;
+token>++ MINUS : $-$;
+token>++ PLUS : $+$;
+token>++ MUL : $*$;
+token>++ DIV : $/$;
+token>++ O : $($;
+token>++ C : $)$;
