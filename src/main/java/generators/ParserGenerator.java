@@ -1,3 +1,5 @@
+package generators;
+
 import grammar.Alternative;
 import grammar.Decl;
 import grammar.Grammar;
@@ -7,14 +9,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ParserGen {
+public class ParserGenerator {
 
     private static StringBuilder str = new StringBuilder();
     private static String prefix;
+    private static CompilationResult compilationResult;
 
-    public static String generate(Grammar g, String prefix) {
+    public static String gen(final Grammar grammar, final String prefix, final CompilationResult cr) {
+        return null;
+    }
+
+    public static String generate(Grammar g, String prefix, CompilationResult result) {
         str = new StringBuilder();
-        ParserGen.prefix = prefix;
+        ParserGenerator.prefix = prefix;
+        compilationResult = result;
         addHeader();
         addBody(g);
         addCurToken();
@@ -51,7 +59,7 @@ public class ParserGen {
             for (int i = 0; i < first.size() - 1; ++i) {
                 str.append("case ").append(first.get(i)).append(":\n");
             }
-            System.out.println(d.name);
+//            System.out.println(d.name);
             str.append("case ").append(first.get(first.size() - 1)).append(":\n");
 
 
@@ -86,11 +94,12 @@ public class ParserGen {
     }
 
     public static Set<String> calcFirst(final String A, final List<Unit> right) {
-        var first = new HashSet<>(Main.getSimpleFirst(right));
+        var first = new HashSet<>(compilationResult.simple(right));
+
         if (first.contains("eps")) {
             first.remove("eps");
 
-            var follow = new HashSet<>(Main.followForNon.get(A));
+            var follow = new HashSet<>(compilationResult.follow(A));
             first.addAll(follow);
             return first;
         } else {

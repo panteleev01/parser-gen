@@ -1,3 +1,5 @@
+package generators;
+
 import org.apache.commons.text.StringSubstitutor;
 
 import java.util.Map;
