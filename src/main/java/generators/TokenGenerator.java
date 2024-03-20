@@ -62,7 +62,7 @@ public class TokenGenerator {
         );
     }
 
-    private String substitute(
+    public static String substitute(
             final String template,
             final Map.Entry<String, String>... variables
     ) {

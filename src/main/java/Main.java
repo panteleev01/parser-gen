@@ -51,8 +51,7 @@ public class Main {
                 lexerStr
         );
 
-        String parserStr = ParserGenerator
-                .generate(g, prefix, result);
+        String parserStr = ParserGenerator.gen(g, prefix, result);
 
         Files.writeString(
                 Path.of(dirPath + prefix + "Parser.java"),
