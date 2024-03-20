@@ -1,9 +1,6 @@
 package generators;
 
-import grammar.Alternative;
-import grammar.Decl;
-import grammar.Grammar;
-import grammar.Unit;
+import grammar.*;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.util.HashSet;
@@ -88,13 +85,13 @@ public class ParserGenerator {
     private String argsList(final Decl decl) {
         final StringBuilder builder = new StringBuilder();
 
-        for (int i = 0; i < decl.argsNames.size(); ++i) {
+        for (int i = 0; i < decl.variables.size(); ++i) {
+            final Variable v = decl.variables.get(i);
             builder
-                    .append(decl.argsTypes.get(i))
+                    .append(v.type())
                     .append(" ")
-                    .append(decl.argsNames.get(i));
-
-            if (i != decl.argsNames.size() - 1) builder.append(", ");
+                    .append(v.name());
+            if (i != decl.variables.size() - 1) builder.append(", ");
         }
 
         return builder.toString();

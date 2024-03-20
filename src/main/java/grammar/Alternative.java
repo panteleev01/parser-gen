@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Alternative {
+
     public final List<Unit> rightSide;
     public final String codeBlock;
     public final List<List<String>> args;
