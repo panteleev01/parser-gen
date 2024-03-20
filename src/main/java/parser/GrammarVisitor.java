@@ -73,7 +73,6 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
         return new Grammar(
                 mainRule,
                 new HashMap<>(rules),
-                new HashMap<>(terminals),
                 new ArrayList<>(terminalsList)
         );
     }
