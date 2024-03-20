@@ -10,18 +10,18 @@ public class LexerGenerator {
             import java.text.ParseException;
             import java.util.regex.Pattern;
                         
-            public class ${prefix}LexicalAnalyzer {
-                public ${prefix}TokenWrapper curToken;
+            public class ${regex}LexicalAnalyzer {
+                public ${regex}TokenWrapper curToken;
                 private final String stream;
                 private int curPos = 0;
                         
-                public ${prefix}LexicalAnalyzer(final String stream) {
+                public ${regex}LexicalAnalyzer(final String stream) {
                     this.stream = stream;
                 }
                         
                 public void nextToken() throws ParseException {
                     if (curPos >= stream.length()) {
-                        curToken = new ${prefix}TokenWrapper("", ${prefix}Token.END);
+                        curToken = new ${regex}TokenWrapper("", ${regex}Token.END);
                         return;
                     }
                         
@@ -31,12 +31,12 @@ public class LexerGenerator {
                         
                     var tail = stream.substring(curPos);
                         
-                    for (var token: ${prefix}Token.values()) {
+                    for (var token: ${regex}Token.values()) {
                         var matcher = Pattern.compile(token.regex).matcher(tail);
                         if (matcher.lookingAt()) {
                             String head = matcher.group();
                             curPos += head.length();
-                            curToken = new ${prefix}TokenWrapper(head, token);
+                            curToken = new ${regex}TokenWrapper(head, token);
                             return;
                         }
                     }
@@ -50,7 +50,7 @@ public class LexerGenerator {
 
     private LexerGenerator(final String prefix) {
         final Map<String, String> map = Map.of(
-                "prefix", prefix
+                "regex", prefix
         );
         this.substitutor = new StringSubstitutor(map);
     }

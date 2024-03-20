@@ -2,10 +2,7 @@ package parser;
 
 import antlr4.GrammarBaseVisitor;
 import antlr4.GrammarParser;
-import grammar.Decl;
-import grammar.Grammar;
-import grammar.Alternative;
-import grammar.Variable;
+import grammar.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,12 +14,16 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
     private Map<String, String> terminals;
     private Map<Decl, List<Alternative>> rules;
 
+    private List<GrammarTerminal> terminalsList;
+
     private void parseTerminal(final GrammarParser.TerminalContext term) {
         final String terminal = term.ID().getText();
         final String regex = term.REGEX().getText();
         terminals.put(terminal, regex);
-    }
 
+        // todo: may be united with Terminal class???
+        terminalsList.add(new GrammarTerminal(terminal, regex));
+    }
 
     private void parseMatchRule(final GrammarParser.RuleContext ctx) {
         final String name = ctx.ID(0).getText();
@@ -54,6 +55,8 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
         final String mainRule = ctx.mainRule().ID().getText();
 
         terminals = new HashMap<>();
+        terminalsList = new ArrayList<>();
+
         rules = new HashMap<>();
 
         ctx.matcher().forEach(c -> {
@@ -70,7 +73,8 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
         return new Grammar(
                 mainRule,
                 new HashMap<>(rules),
-                new HashMap<>(terminals)
+                new HashMap<>(terminals),
+                new ArrayList<>(terminalsList)
         );
     }
 

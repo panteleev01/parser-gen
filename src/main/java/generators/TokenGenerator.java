@@ -1,8 +1,10 @@
 package generators;
 
 import grammar.Grammar;
+import grammar.GrammarTerminal;
 import org.apache.commons.text.StringSubstitutor;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -22,7 +24,7 @@ public class TokenGenerator {
         this.grammar = grammar;
 
         final Map<String, String> parameters = Map.of(
-                "prefix", prefix
+                "regex", prefix
         );
         this.substitutor = new StringSubstitutor(parameters);
     }
@@ -33,12 +35,10 @@ public class TokenGenerator {
         final String enumHeader = genHeader();
         enumBuilder.append(enumHeader).append('\n');
 
-        var terminals = grammar.terminals.entrySet();
-        terminals.forEach(t -> {
-            final String enumInstance = genInstance(t.getKey(), t.getValue());
+        grammar.terminalsList.forEach(t -> {
+            final String enumInstance = genInstance(t.name(), t.regex());
             enumBuilder.append(enumInstance).append('\n');
         });
-
 
         final String endTerm = genInstance("END", "$");
         enumBuilder.append(endTerm).append(";\n");
@@ -71,7 +71,7 @@ public class TokenGenerator {
     }
 
     private String genHeader() {
-        final String headerTemplate = "public enum ${prefix}Token {";
+        final String headerTemplate = "public enum ${regex}Token {";
         return substitutor.replace(headerTemplate);
     }
 
@@ -80,7 +80,7 @@ public class TokenGenerator {
                 
                 public final String regex;
                 
-                ${prefix}Token (final String regex) {
+                ${regex}Token (final String regex) {
                     this.regex = regex;
                 }
                 

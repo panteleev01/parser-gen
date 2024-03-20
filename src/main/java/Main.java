@@ -49,6 +49,8 @@ public class Main {
 
         final CompilationResult result = GrammarCompilation.compile(g);
 
+        // create Util class
+
         final String tokenWrapperSrc = TokenWrapperGenerator.gen(prefix);
         createFile(tokenWrapperSrc, dirPath, prefix, "TokenWrapper.java");
 
@@ -64,8 +66,8 @@ public class Main {
 
     public static void createExpression() throws IOException {
         final Path grammarPath = Path.of("src/test/java/expression/exprGrammar.txt");
-        final String sourcesPath = "result/expressionx/";
-        create(grammarPath, sourcesPath, "Expressionx");
+        final String sourcesPath = "result/expression/";
+        create(grammarPath, sourcesPath, "Expression");
     }
 
     public static void createLambda() throws IOException {

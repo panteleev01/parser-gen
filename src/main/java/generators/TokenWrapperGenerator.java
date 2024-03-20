@@ -9,18 +9,18 @@ public class TokenWrapperGenerator {
 
     private final static String WRAPPER_TEMPLATE = """
        
-            public class ${prefix}TokenWrapper {
+            public class ${regex}TokenWrapper {
                 public String value;
-                public ${prefix}Token token;
+                public ${regex}Token token;
                         
-                public ${prefix}TokenWrapper(String v1, ${prefix}Token t) {
+                public ${regex}TokenWrapper(String v1, ${regex}Token t) {
                     this.value = v1;
                     this.token = t;
                 }
                         
                 @Override
                 public String toString() {
-                    return "${prefix}TokenWrapper{" +
+                    return "${regex}TokenWrapper{" +
                             "value='" + value + '\\'' +
                             ", token=" + token +
                             '}';
@@ -34,7 +34,7 @@ public class TokenWrapperGenerator {
 
     public TokenWrapperGenerator(String prefix) {
         final Map<String, String> parameters = Map.of(
-                "prefix", prefix
+                "regex", prefix
         );
         this.substitutor = new StringSubstitutor(parameters);
     }
