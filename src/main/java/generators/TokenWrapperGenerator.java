@@ -5,7 +5,7 @@ import org.apache.commons.text.StringSubstitutor;
 
 import java.util.Map;
 
-public class TerminalWrapperGenerator {
+public class TokenWrapperGenerator {
 
     private final static String WRAPPER_TEMPLATE = """
        
@@ -32,7 +32,7 @@ public class TerminalWrapperGenerator {
 
     private final StringSubstitutor substitutor;
 
-    public TerminalWrapperGenerator(String prefix) {
+    public TokenWrapperGenerator(String prefix) {
         final Map<String, String> parameters = Map.of(
                 "prefix", prefix
         );
@@ -42,7 +42,7 @@ public class TerminalWrapperGenerator {
     public static String gen(
             final String prefix
     ) {
-        return new TerminalWrapperGenerator(prefix).gen();
+        return new TokenWrapperGenerator(prefix).gen();
     }
 
     private String gen() {
