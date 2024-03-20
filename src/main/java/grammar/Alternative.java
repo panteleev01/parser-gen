@@ -15,7 +15,7 @@ public class Alternative {
         this.args = args;
     }
 
-    private List<Unit> mapTerms(final List<String> rightSide) {
+    private static List<Unit> mapTerms(final List<String> rightSide) {
         return rightSide.stream().map(s -> {
             if (s.equals("EPS")) return Eps.get();
             if (Character.isUpperCase(s.charAt(0))) {
@@ -23,7 +23,7 @@ public class Alternative {
             } else {
                 return new NonTerminal(s);
             }
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     public void print() {

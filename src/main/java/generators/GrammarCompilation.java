@@ -48,7 +48,7 @@ public class GrammarCompilation {
             final var cur = alpha.get(i);
             if (!cur.isNonTerminal()) continue;
             final var term = (NonTerminal) cur;
-            var oldFollow = followForNon.computeIfAbsent(term.str, k -> new HashSet<>());
+            var oldFollow = followForNon.computeIfAbsent(term.str(), k -> new HashSet<>());
             var initSize = oldFollow.size();
 
             var gamma = alpha.subList(i + 1, alpha.size());
@@ -61,13 +61,13 @@ public class GrammarCompilation {
                         new HashSet<>(followForNon.getOrDefault(left, new HashSet<>()));
                 gammaFirst.addAll(aFollow);
 
-                followForNon.get(term.str).addAll(gammaFirst);
+                followForNon.get(term.str()).addAll(gammaFirst);
             } else {
                 gammaFirst.remove("eps");
-                followForNon.get(term.str).addAll(gammaFirst);
+                followForNon.get(term.str()).addAll(gammaFirst);
             }
             updated |=
-                    initSize != followForNon.get(term.str).size();
+                    initSize != followForNon.get(term.str()).size();
         }
         return updated;
     }
@@ -113,10 +113,10 @@ public class GrammarCompilation {
         if (alpha.size() == 1 && alpha.get(0).equals(Eps.get())) {
             return new HashSet<>(Set.of("eps"));
         } else if (alpha.get(0) instanceof Terminal t) {
-            return new HashSet<>(Set.of(t.str));
+            return new HashSet<>(Set.of(t.str()));
         } else {
             final NonTerminal nt = (NonTerminal) alpha.get(0);
-            Set<String> forHead = first.getOrDefault(nt.str, new HashSet<>());
+            Set<String> forHead = first.getOrDefault(nt.str(), new HashSet<>());
             forHead = new HashSet<>(forHead);
             if (forHead.contains("eps")) {
                 forHead.remove("eps");

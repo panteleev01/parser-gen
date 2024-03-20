@@ -1,6 +1,5 @@
 package grammar;
 
-import parser.GrammarVisitor;
 
 import java.util.List;
 import java.util.Objects;
@@ -11,7 +10,7 @@ public class Decl {
     public final String type;
     public final List<Variable> variables;
 
-    public Decl(final String name, final String type, List<Variable> variables) {
+    public Decl(final String name, final String type, final List<Variable> variables) {
         this.name = name;
         this.type = type;
         this.variables = variables;

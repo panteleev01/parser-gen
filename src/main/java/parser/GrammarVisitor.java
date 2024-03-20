@@ -11,17 +11,15 @@ import java.util.*;
 
 public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
 
-    private Map<String, String> terminals;
     private Map<Decl, List<Alternative>> rules;
 
+    // todo: may be united with Terminal class???
     private List<GrammarTerminal> terminalsList;
 
     private void parseTerminal(final GrammarParser.TerminalContext term) {
         final String terminal = term.ID().getText();
         final String regex = term.REGEX().getText();
-        terminals.put(terminal, regex);
 
-        // todo: may be united with Terminal class???
         terminalsList.add(new GrammarTerminal(terminal, regex));
     }
 
@@ -29,12 +27,10 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
         final String name = ctx.ID(0).getText();
         final String type = ctx.ID(1).getText();
 
-        final List<Alternative> objects =
+        final List<Alternative> alternatives =
                 ctx.namedRule().stream().map(this::parseNamedRule).toList();
 
         final List<TerminalNode> args = ctx.args().ID();
-        final List<String> names = new ArrayList<>();
-        final List<String> types = new ArrayList<>();
 
         final List<Variable> variables = new ArrayList<>();
 
@@ -46,7 +42,7 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
 
         rules.put(
                 new Decl(name, type, variables),
-                objects
+                alternatives
         );
     }
 
@@ -54,10 +50,8 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
     public Grammar visitMain(final GrammarParser.MainContext ctx) {
         final String mainRule = ctx.mainRule().ID().getText();
 
-        terminals = new HashMap<>();
-        terminalsList = new ArrayList<>();
-
         rules = new HashMap<>();
+        terminalsList = new ArrayList<>();
 
         ctx.matcher().forEach(c -> {
             if (c instanceof GrammarParser.MatchTerminalContext terminalCtx) {
@@ -77,8 +71,8 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
         );
     }
 
-    public Alternative parseNamedRule(GrammarParser.NamedRuleContext ctx) {
-        final var pairs = extractRightSide(ctx.rightSide());
+    public Alternative parseNamedRule(final GrammarParser.NamedRuleContext ctx) {
+        final List<Pair<String, List<String>>> pairs = extractRightSide(ctx.rightSide());
 
         final List<String> terminals = pairs.stream().map(Pair::getLeft).toList();
         final List<List<String>> args = pairs.stream().map(Pair::getRight).toList();
@@ -88,8 +82,8 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
 
     public List<Pair<String, List<String>>> extractRightSide(final GrammarParser.RightSideContext ctx) {
         return ctx.callArgs().stream().map(call -> {
-            final var name = call.ID().getText();
-            final var args = call.REGEX().stream()
+            final String name = call.ID().getText();
+            final List<String> args = call.REGEX().stream()
                     .map(ParseTree::getText)
                     .map(s -> s.substring(1, s.length() - 1))
                     .toList();

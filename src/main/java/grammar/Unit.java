@@ -1,8 +1,11 @@
 package grammar;
 
 public interface Unit {
-    boolean isTerminal();
-    boolean isNonTerminal();
-    boolean isEnd();
-    boolean isEps();
+    default boolean isTerminal() {
+        return false;
+    }
+    default boolean isNonTerminal() {
+        return false;
+    }
+
 }

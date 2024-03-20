@@ -10,9 +10,7 @@ public class Grammar {
     public final String mainRule;
 
     public final Map<Decl, List<Alternative>> rules;
-
     public final List<GrammarTerminal> terminalsList;
-
 
     public Grammar(
             final String mainRule,
@@ -31,7 +29,11 @@ public class Grammar {
         }).toList();
     }
 
-    private String convertRegex(String regex) {
+    private static String convertRegex(String regex) {
+        if (regex.length() < 2) {
+            throw new IllegalArgumentException("regex length should be bigger than 1");
+        }
+
         regex = regex.substring(1, regex.length() - 1);
         if (regex.equals("*")) {
             regex = "\\*";
@@ -44,15 +46,5 @@ public class Grammar {
         if (regex.equals("[")) return "\\[";
         if (regex.equals("]")) return "\\]";
         return regex;
-    }
-
-    public void print() {
-        System.out.println(mainRule);
-        rules.entrySet().forEach(entry -> {
-            System.out.println(entry.getKey());
-            System.out.println(" = ");
-            entry.getValue().forEach(Alternative::print);
-        });
-
     }
 }

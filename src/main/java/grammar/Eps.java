@@ -19,26 +19,6 @@ public class Eps implements Unit {
     }
 
     @Override
-    public boolean isTerminal() {
-        return false;
-    }
-
-    @Override
-    public boolean isNonTerminal() {
-        return false;
-    }
-
-    @Override
-    public boolean isEnd() {
-        return false;
-    }
-
-    @Override
-    public boolean isEps() {
-        return true;
-    }
-
-    @Override
     public String toString() {
         return "eps";
     }
