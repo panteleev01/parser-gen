@@ -4,6 +4,7 @@ import grammar.Decl;
 import grammar.Grammar;
 import grammar.Alternative;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
@@ -55,8 +56,9 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
 
     public Alternative parseNamedRule(GrammarParser.NamedRuleContext ctx) {
         final var pairs = extractRightSide(ctx.rightSide());
-        final var terminals = pairs.stream().map(Pair::a).toList();
-        final var args = pairs.stream().map(Pair::b).toList();
+
+        final var terminals = pairs.stream().map(Pair::getLeft).toList();
+        final var args = pairs.stream().map(Pair::getRight).toList();
         final var block = ctx.BLOCK().getText();
         return new Alternative(terminals, block, args);
     }
@@ -68,7 +70,7 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
                     .map(ParseTree::getText)
                     .map(s -> s.substring(1, s.length() - 1))
                     .toList();
-            return new Pair<>(name, args);
+            return Pair.of(name, args);
         }).toList();
     }
 
