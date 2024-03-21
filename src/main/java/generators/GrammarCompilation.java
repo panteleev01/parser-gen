@@ -37,9 +37,9 @@ public class GrammarCompilation {
         while (true) {
             boolean changed = false;
 
-            for (final Rule rule: grammar.getRules()) {
+            for (final Rule rule : grammar.getRules()) {
                 final String ruleName = rule.decl().getName();
-                for (var alternative: rule.alternatives()) {
+                for (var alternative : rule.alternatives()) {
                     changed |= updateFollow(ruleName, alternative.getRightSide());
                 }
             }
@@ -78,9 +78,9 @@ public class GrammarCompilation {
         while (true) {
             boolean stateUpdated = false;
 
-            for (final Rule rule: grammar.getRules()) {
+            for (final Rule rule : grammar.getRules()) {
                 final String ruleName = rule.decl().getName();
-                for (final var alternative: rule.alternatives()) {
+                for (final var alternative : rule.alternatives()) {
                     stateUpdated |= updateFirst(ruleName, alternative.getRightSide());
                 }
             }
@@ -132,28 +132,32 @@ public class GrammarCompilation {
 
 
     private void checkLL1Grammar() {
-        for (var declListEntry : grammar.getRules()) {
-            String A = declListEntry.decl().getName();
-            for (int i = 0; i < declListEntry.alternatives().size(); ++i) {
-                for (int j = 0; j < declListEntry.alternatives().size(); ++j) {
+        for (var rules : grammar.getRules()) {
+            final String ruleName = rules.decl().getName();
+            final List<Alternative> alternatives = rules.alternatives();
+            for (int i = 0; i < alternatives.size(); ++i) {
+                for (int j = 0; j < alternatives.size(); ++j) {
                     if (i == j) continue;
-                    var alpha = declListEntry.alternatives().get(i).getRightSide();
-                    var beta = declListEntry.alternatives().get(j).getRightSide();
-
-                    var alphaFirst = calcSimpleFirst(alpha);
-                    var betaFirst = calcSimpleFirst(beta);
-
-                    var x = new HashSet<>(alphaFirst);
-                    x.retainAll(betaFirst);
-                    if (!x.isEmpty()) throw new AssertionError("Not LL1 grammar");
-
-                    if (alphaFirst.contains("eps")) {
-                        var y = new HashSet<>(betaFirst);
-                        y.retainAll(followForNon.get(A));
-                        if (!y.isEmpty()) throw new AssertionError("Not LL1 grammar");
-                    }
+                    checkLL1Pair(
+                            ruleName,
+                            alternatives.get(i).getRightSide(),
+                            alternatives.get(j).getRightSide()
+                    );
                 }
             }
+        }
+    }
+
+    private void checkLL1Pair(final String ruleName, final List<Unit> alpha, final List<Unit> beta) {
+        final Set<String> alphaFirst = calcSimpleFirst(alpha);
+        final Set<String> betaFirst = calcSimpleFirst(beta);
+
+        final var diff = Sets.intersection(alphaFirst, betaFirst);
+        if (!diff.isEmpty()) throw new AssertionError("Not LL1 grammar");
+
+        if (alphaFirst.contains(EPS)) {
+            final var diff2 = Sets.intersection(betaFirst, followForNon.get(ruleName));
+            if (!diff2.isEmpty()) throw new AssertionError("Not LL1 grammar");
         }
     }
 
