@@ -47,7 +47,7 @@ public class ParserGenerator {
         final StringBuilder sb = new StringBuilder();
         sb.append(genHeader());
 
-        for (var rules : g.rules) {
+        for (var rules : g.getRules()) {
             sb.append(genRule(rules.decl(), rules.alternatives()));
         }
 
@@ -99,13 +99,13 @@ public class ParserGenerator {
     private String argsList(final Decl decl) {
         final StringBuilder builder = new StringBuilder();
 
-        for (int i = 0; i < decl.variables.size(); ++i) {
-            final Variable v = decl.variables.get(i);
+        for (int i = 0; i < decl.getVariables().size(); ++i) {
+            final Variable v = decl.getVariables().get(i);
             builder
                     .append(v.type())
                     .append(" ")
                     .append(v.name());
-            if (i != decl.variables.size() - 1) builder.append(", ");
+            if (i != decl.getVariables().size() - 1) builder.append(", ");
         }
 
         return builder.toString();
@@ -123,8 +123,8 @@ public class ParserGenerator {
 
         final String funcDecl = TokenGenerator.substitute(
                 funcDeclTemplate,
-                Map.entry("returnType", d.type),
-                Map.entry("funcName", d.name),
+                Map.entry("returnType", d.getType()),
+                Map.entry("funcName", d.getName()),
                 Map.entry("funcArgs", argsList(d))
         );
 
@@ -134,7 +134,7 @@ public class ParserGenerator {
 
         for (var alt : alts) {
 
-            final List<String> first = calcFirst(d.name, alt.rightSide, this.result).stream().map(x -> {
+            final List<String> first = calcFirst(d.getName(), alt.getRightSide(), this.result).stream().map(x -> {
                 if (x.equals("$")) return "END";
                 return x;
             }).toList();
@@ -147,9 +147,9 @@ public class ParserGenerator {
             // final case
             builder.append("case ").append(first.get(first.size() - 1)).append(":\n");
 
-            for (int i = 0; i < alt.rightSide.size(); ++i) {
-                final Unit unit = alt.rightSide.get(i);
-                final List<String> args = alt.args.get(i);
+            for (int i = 0; i < alt.getRightSide().size(); ++i) {
+                final Unit unit = alt.getRightSide().get(i);
+                final List<String> args = alt.getArgs().get(i);
                 if (unit.isTerminal()) {
 
                     final String checkTemplate = """
@@ -178,7 +178,7 @@ public class ParserGenerator {
                 ix += 1;
             }
 
-            builder.append(alt.codeBlock);
+            builder.append(alt.getCodeBlock());
         }
 
 

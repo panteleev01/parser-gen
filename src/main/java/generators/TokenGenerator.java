@@ -41,7 +41,7 @@ public class TokenGenerator {
         final String enumHeader = genHeader();
         enumBuilder.append(enumHeader).append('\n');
 
-        grammar.terminalsList.forEach(t -> {
+        grammar.getTerminalsList().forEach(t -> {
             final String enumInstance = genInstance(t.name(), t.regex());
             enumBuilder.append(enumInstance).append('\n');
         });

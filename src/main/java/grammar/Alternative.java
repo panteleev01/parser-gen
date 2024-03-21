@@ -5,9 +5,9 @@ import java.util.stream.Collectors;
 
 public class Alternative {
 
-    public final List<Unit> rightSide;
-    public final String codeBlock;
-    public final List<List<String>> args;
+    private final List<Unit> rightSide;
+    private final String codeBlock;
+    private final List<List<String>> args;
 
     public Alternative(final List<String> rightSide, final String codeBlock, List<List<String>> args) {
         this.rightSide = mapTerms(rightSide);
@@ -26,9 +26,15 @@ public class Alternative {
         }).toList();
     }
 
-    public void print() {
-        System.out.print(rightSide);
-        System.out.print(" ");
-        System.out.println(codeBlock);
+    public List<Unit> getRightSide() {
+        return rightSide;
+    }
+
+    public String getCodeBlock() {
+        return codeBlock;
+    }
+
+    public List<List<String>> getArgs() {
+        return args;
     }
 }

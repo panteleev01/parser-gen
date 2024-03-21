@@ -1,10 +1,15 @@
 package generators;
 
+import com.google.common.collect.Sets;
 import grammar.*;
 
 import java.util.*;
 
 public class GrammarCompilation {
+
+
+    private static final String EPS = "eps";
+    private static final String DOLLAR = "$";
 
     private final Map<String, Set<String>> firstForNon = new HashMap<>();
     private final Map<String, Set<String>> followForNon = new HashMap<>();
@@ -19,66 +24,64 @@ public class GrammarCompilation {
     }
 
     private CompilationResult compile() {
-        calcFirst();
-        calcFollow();
-        checkLL1();
+        calculateFirstTokens();
+        calculateFollowTokens();
+        checkLL1Grammar();
 
         return new CompilationResult(firstForNon, followForNon);
     }
 
-    private void calcFollow() {
-        followForNon.put(grammar.mainRule, new HashSet<>(Set.of("$")));
+    private void calculateFollowTokens() {
+        followForNon.put(grammar.getMainRule(), Sets.newHashSet(DOLLAR));
+
         while (true) {
             boolean changed = false;
 
-            for (var entry: grammar.rules) {
-                final String left = entry.decl().name;
-                for (var alt: entry.alternatives()) {
-                    changed |= updateFollow(left, alt.rightSide);
+            for (var rule: grammar.getRules()) {
+                final String ruleName = rule.decl().getName();
+                for (var alternative: rule.alternatives()) {
+                    changed |= updateFollow(ruleName, alternative.getRightSide());
                 }
             }
             if (!changed) break;
         }
     }
 
-    private boolean updateFollow(final String left, final List<Unit> alpha) {
+    private boolean updateFollow(final String ruleName, final List<Unit> alternative) {
         boolean updated = false;
-        for (int i = 0; i < alpha.size(); ++i) {
-            final var cur = alpha.get(i);
-            if (!cur.isNonTerminal()) continue;
-            final var term = (NonTerminal) cur;
-            var oldFollow = followForNon.computeIfAbsent(term.str(), k -> new HashSet<>());
-            var initSize = oldFollow.size();
+        for (int i = 0; i < alternative.size(); ++i) {
 
-            var gamma = alpha.subList(i + 1, alpha.size());
+            final var symbol = alternative.get(i);
+            if (!symbol.isNonTerminal()) continue;
 
-            var gammaFirst = getCurSimpleFirst(gamma);
+            final NonTerminal nonTerm = (NonTerminal) symbol;
+            final String nonTermName = nonTerm.str();
 
-            if (gammaFirst.contains("eps")) {
-                gammaFirst.remove("eps");
-                var aFollow =
-                        new HashSet<>(followForNon.getOrDefault(left, new HashSet<>()));
-                gammaFirst.addAll(aFollow);
+            final Set<String> followSet = followForNon.computeIfAbsent(nonTermName, k -> new HashSet<>());
+            final int currentSize = followSet.size();
 
-                followForNon.get(term.str()).addAll(gammaFirst);
-            } else {
-                gammaFirst.remove("eps");
-                followForNon.get(term.str()).addAll(gammaFirst);
+            final List<Unit> ruleTail = alternative.subList(i + 1, alternative.size());
+            final Set<String> tailFirst = getCurSimpleFirst(ruleTail);
+
+            if (tailFirst.remove(EPS)) {
+                var ruleFollow = followForNon.getOrDefault(ruleName, new HashSet<>());
+                tailFirst.addAll(ruleFollow);
             }
-            updated |=
-                    initSize != followForNon.get(term.str()).size();
+
+            followSet.addAll(tailFirst);
+            updated |= (currentSize != followSet.size());
         }
         return updated;
     }
 
-    private void calcFirst() {
+    private void calculateFirstTokens() {
         while (true) {
             boolean stateUpdated = false;
 
-            for (var entry: grammar.rules) {
-                final String left = entry.decl().name;
-                for (var alt: entry.alternatives()) {
-                    stateUpdated |= updateFirst(left, alt.rightSide);
+            for (var rule: grammar.getRules()) {
+                final String ruleName = rule.decl().getName();
+                for (var alt: rule.alternatives()) {
+                    stateUpdated |= updateFirst(ruleName, alt.getRightSide());
                 }
             }
             if (!stateUpdated) break;
@@ -127,14 +130,14 @@ public class GrammarCompilation {
     }
 
 
-    private void checkLL1() {
-        for (var declListEntry : grammar.rules) {
-            String A = declListEntry.decl().name;
+    private void checkLL1Grammar() {
+        for (var declListEntry : grammar.getRules()) {
+            String A = declListEntry.decl().getName();
             for (int i = 0; i < declListEntry.alternatives().size(); ++i) {
                 for (int j = 0; j < declListEntry.alternatives().size(); ++j) {
                     if (i == j) continue;
-                    var alpha = declListEntry.alternatives().get(i).rightSide;
-                    var beta = declListEntry.alternatives().get(j).rightSide;
+                    var alpha = declListEntry.alternatives().get(i).getRightSide();
+                    var beta = declListEntry.alternatives().get(j).getRightSide();
 
                     var alphaFirst = getCurSimpleFirst(alpha);
                     var betaFirst = getCurSimpleFirst(beta);

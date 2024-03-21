@@ -5,9 +5,9 @@ import java.util.Objects;
 
 public class Decl {
 
-    public final String name;
-    public final String type;
-    public final List<Variable> variables;
+    private final String name;
+    private final String type;
+    private final List<Variable> variables;
 
     public Decl(final String name, final String type, final List<Variable> variables) {
         this.name = name;
@@ -26,5 +26,17 @@ public class Decl {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public List<Variable> getVariables() {
+        return variables;
     }
 }

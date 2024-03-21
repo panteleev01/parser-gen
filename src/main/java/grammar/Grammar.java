@@ -7,10 +7,9 @@ import java.util.Map;
 
 public class Grammar {
 
-    public final String mainRule;
-
-    public final List<GrammarTerminal> terminalsList;
-    public final List<Rule> rules;
+    private  final String mainRule;
+    private final List<GrammarTerminal> terminalsList;
+    private final List<Rule> rules;
 
     public Grammar(
             final String mainRule,
@@ -46,5 +45,17 @@ public class Grammar {
         if (regex.equals("[")) return "\\[";
         if (regex.equals("]")) return "\\]";
         return regex;
+    }
+
+    public String getMainRule() {
+        return mainRule;
+    }
+
+    public List<GrammarTerminal> getTerminalsList() {
+        return terminalsList;
+    }
+
+    public List<Rule> getRules() {
+        return rules;
     }
 }
