@@ -102,26 +102,31 @@ public class GrammarCompilation {
     }
 
     public static Set<String> calcSimpleFirstForMap(
-            final List<Unit> alpha,
+            final List<Unit> alternative,
             final Map<String, Set<String>> first
     ) {
-        if (alpha.isEmpty()) return new HashSet<>(Set.of("eps"));
-        if (alpha.size() == 1 && alpha.get(0).equals(Eps.get())) {
-            return new HashSet<>(Set.of("eps"));
-        } else if (alpha.get(0) instanceof Terminal t) {
-            return new HashSet<>(Set.of(t.str()));
+        if (alternative.isEmpty()) return Sets.newHashSet(EPS);
+
+        final Unit headSymbol = alternative.get(0);
+
+        if (alternative.size() == 1 && headSymbol.equals(Eps.get())) {
+            return Sets.newHashSet(EPS);
+        } else if (headSymbol instanceof Terminal terminal) {
+            return Sets.newHashSet(terminal.str());
         } else {
-            final NonTerminal nt = (NonTerminal) alpha.get(0);
-            Set<String> forHead = first.getOrDefault(nt.str(), new HashSet<>());
-            forHead = new HashSet<>(forHead);
-            if (forHead.contains("eps")) {
-                forHead.remove("eps");
-                Set<String> forTail = calcSimpleFirstForMap(alpha.subList(1, alpha.size()), first);
-                forHead.addAll(forTail);
-            } else {
-                forHead.remove("eps");
+            final NonTerminal nonTerminal = (NonTerminal) headSymbol;
+
+            final Set<String> firstForHead = new HashSet<>(
+                    first.getOrDefault(nonTerminal.str(), new HashSet<>())
+            );
+
+            if (firstForHead.remove(EPS)) {
+                final List<Unit> tail = alternative.subList(1, alternative.size());
+                final Set<String> firstForTail = calcSimpleFirstForMap(tail, first);
+                firstForHead.addAll(firstForTail);
             }
-            return forHead;
+
+            return firstForHead;
         }
     }
 
