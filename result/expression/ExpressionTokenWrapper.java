@@ -1,17 +1,17 @@
 
 
-public class LambdaTokenWrapper {
+public class ExpressionTokenWrapper {
     public String value;
-    public LambdaToken token;
+    public ExpressionToken token;
 
-    public LambdaTokenWrapper(String v1, LambdaToken t) {
+    public ExpressionTokenWrapper(String v1, ExpressionToken t) {
         this.value = v1;
         this.token = t;
     }
 
     @Override
     public String toString() {
-        return "LambdaTokenWrapper{" +
+        return "ExpressionTokenWrapper{" +
                 "value='" + value + '\'' +
                 ", token=" + token +
                 '}';

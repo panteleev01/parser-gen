@@ -1,10 +1,9 @@
      
-     public enum LambdaToken {
+     public enum ExpressionToken {
 
-LAMBDA("LAMBDA"),
-SEMICOLON(":"),
-VARNAME("[a-z]+"),
 COMMA(","),
+SO("\\["),
+SC("\\]"),
 eps("eps"),
 N("[0-9]+"),
 MINUS("-"),
@@ -17,7 +16,7 @@ END("$"),;
 
 public final String regex;
 
-LambdaToken (final String regex) {
+ExpressionToken (final String regex) {
     this.regex = regex;
 }
 
