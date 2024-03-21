@@ -2,7 +2,6 @@ import antlr4.GrammarLexer;
 import antlr4.GrammarParser;
 import generators.*;
 import grammar.*;
-import jdk.jshell.execution.Util;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -36,11 +35,14 @@ public class Main {
             final String text,
             final String dirPath,
             final String filePrefix,
-            final String name
+            final String className
     ) throws IOException {
         Files.createDirectories(Path.of(dirPath));
+
+        final String fileName = filePrefix + className + ".java";
+
         Files.writeString(
-                Path.of(dirPath + filePrefix + name + ".java"),
+                Path.of(dirPath + fileName),
                 text
         );
     }
@@ -48,43 +50,44 @@ public class Main {
     public static void create(
             final Path grammarPath,
             final String dirPath,
+            final String packageStr,
             final String prefix
     ) throws IOException {
         final Grammar g = parseGrammar(grammarPath);
 
         final CompilationResult result = GrammarCompilation.compile(g);
 
-        final String utilSrc = UtilClassGenerator.generate(prefix);
-        createFile(utilSrc, dirPath + "/util/", prefix, "Util");
+        final String utilSrc = UtilClassGenerator.generate(prefix, packageStr);
+        createFile(utilSrc,dirPath + "/util/", prefix, "Util");
 
-        final String tokenWrapperSrc = TokenWrapperGenerator.gen(prefix);
+        final String tokenWrapperSrc = TokenWrapperGenerator.gen(prefix, packageStr);
         createFile(tokenWrapperSrc, dirPath, prefix, "TokenWrapper");
 
-        final String tokenSrc = TokenGenerator.generate(g, prefix);
+        final String tokenSrc = TokenGenerator.generate(g, prefix, packageStr);
         createFile(tokenSrc, dirPath, prefix, "Token");
 
-        final String lexerSrc = LexerGenerator.gen(prefix);
+        final String lexerSrc = LexerGenerator.gen(prefix, packageStr);
         createFile(lexerSrc, dirPath, prefix, "LexicalAnalyzer");
 
-        String parserSrc = ParserGenerator.gen(g, prefix, result);
+        String parserSrc = ParserGenerator.gen(g, prefix, result, packageStr);
         createFile(parserSrc, dirPath, prefix, "Parser");
     }
 
     public static void createExpression() throws IOException {
         final Path grammarPath = Path.of("src/test/java/expression/exprGrammar.txt");
-        final String sourcesPath = "result/expressionx/";
-        create(grammarPath, sourcesPath, "Expressionx");
+        final String sourcesPath = "result/expression/";
+        create(grammarPath, sourcesPath, "", "Expression");
     }
 
     public static void createLambda() throws IOException {
         final Path grammarPath = Path.of("src/test/java/lambda/lambdaGrammar.txt");
         final String sourcesPath = "result/lambda/";
-        create(grammarPath, sourcesPath, "Lambda");
+        create(grammarPath, sourcesPath, "", "Lambda");
     }
 
     public static void main(final String[] args) throws IOException {
         createExpression();
-//        createLambda();
+        createLambda();
     }
 
 }

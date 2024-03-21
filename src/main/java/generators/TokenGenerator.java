@@ -11,20 +11,26 @@ import java.util.Map;
 public class TokenGenerator {
 
     public static String generate(
-            Grammar grammar,
-            String prefix
+            final Grammar grammar,
+            final String prefix,
+            final String packageStr
     ) {
-        return new TokenGenerator(grammar, prefix).genEnum();
+        return new TokenGenerator(grammar, prefix, packageStr).genEnum();
     }
 
     private final Grammar grammar;
     private final StringSubstitutor substitutor;
 
-    private TokenGenerator(final Grammar grammar, final String prefix) {
+    private TokenGenerator(
+            final Grammar grammar,
+            final String prefix,
+            final String packageStr
+    ) {
         this.grammar = grammar;
 
         final Map<String, String> parameters = Map.of(
-                "regex", prefix
+                "regex", prefix,
+                "package", toPackage(packageStr)
         );
         this.substitutor = new StringSubstitutor(parameters);
     }
@@ -70,8 +76,21 @@ public class TokenGenerator {
         return StringSubstitutor.replace(template, map);
     }
 
+    public static String toPackage(final String packageName) {
+        if (packageName.isEmpty()) return "";
+        return "package " + packageName + ";";
+    }
+
+    public static String withLayer(final String rootPackage, final String layer) {
+        if (rootPackage.isEmpty()) return toPackage(layer);
+        return toPackage(rootPackage + "." + layer);
+    }
+
     private String genHeader() {
-        final String headerTemplate = "public enum ${regex}Token {";
+        final String headerTemplate = """
+                ${package}
+                public enum ${regex}Token {
+           """;
         return substitutor.replace(headerTemplate);
     }
 

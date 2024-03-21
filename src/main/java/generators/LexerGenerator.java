@@ -7,6 +7,8 @@ import java.util.Map;
 public class LexerGenerator {
 
     private final static String LEXER_TEMPLATE = """
+            ${package}
+            
             import java.text.ParseException;
             import java.util.regex.Pattern;
                         
@@ -48,9 +50,10 @@ public class LexerGenerator {
 
     private final StringSubstitutor substitutor;
 
-    private LexerGenerator(final String prefix) {
+    private LexerGenerator(final String prefix, final String packageStr) {
         final Map<String, String> map = Map.of(
-                "regex", prefix
+                "regex", prefix,
+                "package", packageStr
         );
         this.substitutor = new StringSubstitutor(map);
     }
@@ -59,8 +62,8 @@ public class LexerGenerator {
         return substitutor.replace(LEXER_TEMPLATE);
     }
 
-    public static String gen(final String prefix) {
-        return new LexerGenerator(prefix).g();
+    public static String gen(final String prefix, final String packageStr) {
+        return new LexerGenerator(prefix, packageStr).g();
     }
 
 }

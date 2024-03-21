@@ -15,10 +15,10 @@ public class GrammarCompilation {
     }
 
     public static CompilationResult compile(final Grammar g) {
-        return new GrammarCompilation(g).comp();
+        return new GrammarCompilation(g).compile();
     }
 
-    private CompilationResult comp() {
+    private CompilationResult compile() {
         calcFirst();
         calcFollow();
         checkLL1();
@@ -31,10 +31,9 @@ public class GrammarCompilation {
         while (true) {
             boolean changed = false;
 
-            final Map<Decl, List<Alternative>> rules = grammar.rules;
-            for (var entry: rules.entrySet()) {
-                final String left = entry.getKey().name;
-                for (var alt: entry.getValue()) {
+            for (var entry: grammar.rules) {
+                final String left = entry.decl().name;
+                for (var alt: entry.alternatives()) {
                     changed |= updateFollow(left, alt.rightSide);
                 }
             }
@@ -74,17 +73,15 @@ public class GrammarCompilation {
 
     private void calcFirst() {
         while (true) {
-            boolean changed = false;
+            boolean stateUpdated = false;
 
-            final Map<Decl, List<Alternative>> rules = grammar.rules;
-
-            for (var entry: rules.entrySet()) {
-                final String left = entry.getKey().name;
-                for (var alt: entry.getValue()) {
-                    changed |= updateFirst(left, alt.rightSide);
+            for (var entry: grammar.rules) {
+                final String left = entry.decl().name;
+                for (var alt: entry.alternatives()) {
+                    stateUpdated |= updateFirst(left, alt.rightSide);
                 }
             }
-            if (!changed) break;
+            if (!stateUpdated) break;
         }
     }
 
@@ -131,13 +128,13 @@ public class GrammarCompilation {
 
 
     private void checkLL1() {
-        for (var declListEntry : grammar.rules.entrySet()) {
-            String A = declListEntry.getKey().name;
-            for (int i = 0; i < declListEntry.getValue().size(); ++i) {
-                for (int j = 0; j < declListEntry.getValue().size(); ++j) {
+        for (var declListEntry : grammar.rules) {
+            String A = declListEntry.decl().name;
+            for (int i = 0; i < declListEntry.alternatives().size(); ++i) {
+                for (int j = 0; j < declListEntry.alternatives().size(); ++j) {
                     if (i == j) continue;
-                    var alpha = declListEntry.getValue().get(i).rightSide;
-                    var beta = declListEntry.getValue().get(j).rightSide;
+                    var alpha = declListEntry.alternatives().get(i).rightSide;
+                    var beta = declListEntry.alternatives().get(j).rightSide;
 
                     var alphaFirst = getCurSimpleFirst(alpha);
                     var betaFirst = getCurSimpleFirst(beta);

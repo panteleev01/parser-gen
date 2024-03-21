@@ -32,17 +32,17 @@ public class ExpressionTest {
         test("[1+2*5-1, 1+2*5-1]", false, 1);
         test("[1+2+4-1-2, 1+2+4-1-2]", false, 1);
 
-//        test("1+1", false, 2);
-//        test("2*3", false, 6);
-//        test("2*3+4*5", false, 26);
-//        test("2*(3+4)*5", false, 70);
-//        test("1+-2", false, -1);
-//        test("100/2/2", false, 25);
-//        test("100/2/2*3", false, 75);
-//        test("100/2/2+6/2", false, 28);
-//        test("(15 * 7 + 40 / 5) - (20 - 4)", false, 97);
-//        test("  (15 * 7 + 40 / 5) - (20 - 4)  ", false, 97);
-//        test("((((10 + 5) * 3) - 7) / 2) + (15 * 4 - 6 / 2)", false, 76);
+        test("1+1", false, 2);
+        test("2*3", false, 6);
+        test("2*3+4*5", false, 26);
+        test("2*(3+4)*5", false, 70);
+        test("1+-2", false, -1);
+        test("100/2/2", false, 25);
+        test("100/2/2*3", false, 75);
+        test("100/2/2+6/2", false, 28);
+        test("(15 * 7 + 40 / 5) - (20 - 4)", false, 97);
+        test("  (15 * 7 + 40 / 5) - (20 - 4)  ", false, 97);
+        test("((((10 + 5) * 3) - 7) / 2) + (15 * 4 - 6 / 2)", false, 76);
     }
 
     @Test

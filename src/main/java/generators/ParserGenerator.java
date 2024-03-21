@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static generators.TokenGenerator.toPackage;
+
 public class ParserGenerator {
 
     private final StringSubstitutor substitutor;
@@ -15,13 +17,24 @@ public class ParserGenerator {
     private final Grammar g;
     private final String prefix;
 
-    public static String gen(final Grammar grammar, final String prefix, final CompilationResult cr) {
-        return new ParserGenerator(prefix, cr, grammar).g();
+    public static String gen(
+            final Grammar grammar,
+            final String prefix,
+            final CompilationResult cr,
+            final String packageStr
+    ) {
+        return new ParserGenerator(prefix, cr, grammar, packageStr).g();
     }
 
-    public ParserGenerator(final String prefix, final CompilationResult res, final Grammar g) {
+    public ParserGenerator(
+            final String prefix,
+            final CompilationResult res,
+            final Grammar g,
+            final String packageStr
+    ) {
         final Map<String, String> map = Map.of(
-                "regex", prefix
+                "regex", prefix,
+                "package", toPackage(packageStr)
         );
 
         this.substitutor = new StringSubstitutor(map);
@@ -34,8 +47,8 @@ public class ParserGenerator {
         final StringBuilder sb = new StringBuilder();
         sb.append(genHeader());
 
-        for (var rules : g.rules.entrySet()) {
-            sb.append(genRule(rules.getKey(), rules.getValue()));
+        for (var rules : g.rules) {
+            sb.append(genRule(rules.decl(), rules.alternatives()));
         }
 
         sb.append(substitutor.replace(UTIL_FUNCTIONS_TEMPLATE));
@@ -46,6 +59,7 @@ public class ParserGenerator {
     }
 
     private static final String HEADER_TEMPLATE = """
+            ${package}
                         
             import static util.${regex}Util.*;
                         
