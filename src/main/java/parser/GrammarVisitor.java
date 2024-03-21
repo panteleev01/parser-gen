@@ -11,10 +11,11 @@ import java.util.*;
 
 public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
 
-    private Map<Decl, List<Alternative>> rules;
+//    private Map<Decl, List<Alternative>> rules;
 
     // todo: may be united with Terminal class???
     private List<GrammarTerminal> terminalsList;
+    private List<Rule> rules;
 
     private void parseTerminal(final GrammarParser.TerminalContext term) {
         final String terminal = term.ID().getText();
@@ -40,17 +41,19 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
             variables.add(new Variable(argType, argName));
         }
 
-        rules.put(
+
+        final Rule rule = new Rule(
                 new Decl(name, type, variables),
                 alternatives
         );
+        rules.add(rule);
     }
 
     @Override
     public Grammar visitMain(final GrammarParser.MainContext ctx) {
         final String mainRule = ctx.mainRule().ID().getText();
 
-        rules = new HashMap<>();
+        rules = new ArrayList<>();
         terminalsList = new ArrayList<>();
 
         ctx.matcher().forEach(c -> {
@@ -66,7 +69,7 @@ public class GrammarVisitor extends GrammarBaseVisitor<Grammar> {
 
         return new Grammar(
                 mainRule,
-                new HashMap<>(rules),
+                new ArrayList<>(rules),
                 new ArrayList<>(terminalsList)
         );
     }

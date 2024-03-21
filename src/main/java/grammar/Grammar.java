@@ -9,21 +9,16 @@ public class Grammar {
 
     public final String mainRule;
 
-//    public final Map<Decl, List<Alternative>> rules;
     public final List<GrammarTerminal> terminalsList;
     public final List<Rule> rules;
 
     public Grammar(
             final String mainRule,
-            final Map<Decl, List<Alternative>> rules,
+            final List<Rule> rules,
             final List<GrammarTerminal> terminalsList
     ) {
         this.mainRule = mainRule;
-//        this.rules = rules;
-        this.rules = rules
-                .entrySet().stream()
-                .map(e -> new Rule(e.getKey(), e.getValue()))
-                .toList();
+        this.rules = rules;
 
         this.terminalsList = terminalsList.stream().map(t -> {
             final String regex = convertRegex(t.regex());
