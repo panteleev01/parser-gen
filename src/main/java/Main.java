@@ -5,17 +5,20 @@ import grammar.*;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.apache.commons.text.StringSubstitutor;
 import parser.CustomErrorListener;
 import parser.GrammarVisitor;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+
+import static generators.UtilClassGenerator.toPackage;
 
 
 public class Main {
 
-    // throws IO signature if grammar path is absent
     private static Grammar parseGrammar(final Path grammarPath) throws IOException {
         final String str = Files.readString(grammarPath);
         final CharStream input = CharStreams.fromString(str);
@@ -57,19 +60,25 @@ public class Main {
 
         final CompilationResult result = GrammarCompilation.compile(g);
 
+        final Map<String, String> parameters = Map.of(
+                "prefix", prefix,
+                "package", toPackage(packageStr)
+        );
+        final StringSubstitutor defaultSubstitutor = new StringSubstitutor(parameters);
+
         final String utilSrc = UtilClassGenerator.generate(prefix, packageStr);
         createFile(utilSrc,dirPath + "/util/", prefix, "Util");
 
-        final String tokenWrapperSrc = TokenWrapperGenerator.gen(prefix, packageStr);
+        final String tokenWrapperSrc = TokenWrapperGenerator.gen(defaultSubstitutor);
         createFile(tokenWrapperSrc, dirPath, prefix, "TokenWrapper");
 
-        final String tokenSrc = TokenGenerator.generate(g, prefix, packageStr);
+        final String tokenSrc = TokenGenerator.generate(g, defaultSubstitutor);
         createFile(tokenSrc, dirPath, prefix, "Token");
 
-        final String lexerSrc = LexerGenerator.gen(prefix, packageStr);
+        final String lexerSrc = LexerGenerator.gen(defaultSubstitutor);
         createFile(lexerSrc, dirPath, prefix, "LexicalAnalyzer");
 
-        String parserSrc = ParserGenerator.gen(g, prefix, result, packageStr);
+        String parserSrc = ParserGenerator.gen(g, prefix, result, defaultSubstitutor);
         createFile(parserSrc, dirPath, prefix, "Parser");
     }
 

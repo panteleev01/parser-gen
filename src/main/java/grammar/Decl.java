@@ -2,6 +2,7 @@ package grammar;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Decl {
 
@@ -38,5 +39,19 @@ public class Decl {
 
     public List<Variable> getVariables() {
         return variables;
+    }
+
+    public String getTypedVariables() {
+        return variables
+                .stream()
+                .map(v -> v.type() + v.name())
+                .collect(Collectors.joining(", "));
+    }
+
+    public String getVariablesList() {
+        return variables
+                .stream()
+                .map(Variable::name)
+                .collect(Collectors.joining(", "));
     }
 }

@@ -5,25 +5,26 @@ import org.apache.commons.text.StringSubstitutor;
 
 import java.util.Map;
 
-import static generators.TokenGenerator.toPackage;
+import static generators.UtilClassGenerator.toPackage;
+
 
 public class TokenWrapperGenerator {
 
     private final static String WRAPPER_TEMPLATE = """
             ${package}
         
-            public class ${regex}TokenWrapper {
+            public class ${prefix}TokenWrapper {
                 public String value;
-                public ${regex}Token token;
+                public ${prefix}Token token;
                         
-                public ${regex}TokenWrapper(String v1, ${regex}Token t) {
+                public ${prefix}TokenWrapper(String v1, ${prefix}Token t) {
                     this.value = v1;
                     this.token = t;
                 }
                         
                 @Override
                 public String toString() {
-                    return "${regex}TokenWrapper{" +
+                    return "${prefix}TokenWrapper{" +
                             "value='" + value + '\\'' +
                             ", token=" + token +
                             '}';
@@ -35,19 +36,14 @@ public class TokenWrapperGenerator {
 
     private final StringSubstitutor substitutor;
 
-    public TokenWrapperGenerator(final String prefix, final String packageStr) {
-        final Map<String, String> parameters = Map.of(
-                "regex", prefix,
-                "package", toPackage(packageStr)
-        );
-        this.substitutor = new StringSubstitutor(parameters);
+    public TokenWrapperGenerator(final StringSubstitutor substitutor) {
+        this.substitutor = substitutor;
     }
 
     public static String gen(
-            final String prefix,
-            final String packageStr
+            final StringSubstitutor substitutor
     ) {
-        return new TokenWrapperGenerator(prefix, packageStr).gen();
+        return new TokenWrapperGenerator(substitutor).gen();
     }
 
     private String gen() {

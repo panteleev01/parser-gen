@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static generators.TokenGenerator.toPackage;
+import static generators.UtilClassGenerator.substitute;
 
 public class ParserGenerator {
 
@@ -21,23 +21,18 @@ public class ParserGenerator {
             final Grammar grammar,
             final String prefix,
             final CompilationResult cr,
-            final String packageStr
+            final StringSubstitutor substitutor
     ) {
-        return new ParserGenerator(prefix, cr, grammar, packageStr).g();
+        return new ParserGenerator(prefix, cr, grammar, substitutor).g();
     }
 
     public ParserGenerator(
             final String prefix,
             final CompilationResult res,
             final Grammar g,
-            final String packageStr
+            final StringSubstitutor substitutor
     ) {
-        final Map<String, String> map = Map.of(
-                "regex", prefix,
-                "package", toPackage(packageStr)
-        );
-
-        this.substitutor = new StringSubstitutor(map);
+        this.substitutor = substitutor;
         this.result = res;
         this.g = g;
         this.prefix = prefix;
@@ -53,23 +48,57 @@ public class ParserGenerator {
 
         sb.append(substitutor.replace(UTIL_FUNCTIONS_TEMPLATE));
 
+        sb.append(genParseFunction());
+
         sb.append("\n}");
 
         return sb.toString();
     }
 
+    private static final String PARSE_FUNCTION_TEMPLATE = """
+                public ${returnType} parse(${typedArgs}) throws ParseException {
+                    var res = ${mainRule}(${args});
+                    if (analyzer.curToken.token != ${prefix}Token.END)
+                        throw new ParseException("End of input expected", analyzer.curPos());
+                    return res;
+                }
+            """;
+
+    private String genParseFunction() {
+        final String mainRuleName = g.getMainRule();
+
+        final Decl mainRuleDecl = g.getRules().stream()
+                .filter(rule -> rule.decl().getName().equals(mainRuleName))
+                .findAny()
+                .orElseThrow(() -> new IllegalStateException("no rule matching main rule: " + mainRuleName))
+                .decl();
+
+        final String returnType = mainRuleDecl.getType();
+        final String typedArgs = mainRuleDecl.getTypedVariables();
+        final String args = mainRuleDecl.getVariablesList();
+
+        return substitute(
+                PARSE_FUNCTION_TEMPLATE,
+                Map.entry("returnType", returnType),
+                Map.entry("typedArgs", typedArgs),
+                Map.entry("mainRule", mainRuleName),
+                Map.entry("args", args),
+                Map.entry("prefix", prefix)
+        );
+    }
+
     private static final String HEADER_TEMPLATE = """
             ${package}
                         
-            import static util.${regex}Util.*;
+            import static util.${prefix}Util.*;
                         
             import java.text.ParseException;
             import java.util.EnumSet;
                         
-            public class ${regex}Parser {
-                private final ${regex}LexicalAnalyzer analyzer;
+            public class ${prefix}Parser {
+                private final ${prefix}LexicalAnalyzer analyzer;
                         
-                public ${regex}Parser(${regex}LexicalAnalyzer analyzer) throws ParseException {
+                public ${prefix}Parser(${prefix}LexicalAnalyzer analyzer) throws ParseException {
                     this.analyzer = analyzer;
                     analyzer.nextToken();
                 }
@@ -77,7 +106,7 @@ public class ParserGenerator {
             """;
 
     private static final String UTIL_FUNCTIONS_TEMPLATE = """
-               private ${regex}TokenWrapper curToken() {
+               private ${prefix}TokenWrapper curToken() {
                     return analyzer.curToken;
                }
                         
@@ -85,9 +114,9 @@ public class ParserGenerator {
                    analyzer.nextToken();
                }
                 
-               private void check(boolean b) {
+               private void check(boolean b) throws ParseException {
                    if (!b) {
-                       throw new RuntimeException("error");
+                       throw new ParseException("error", analyzer.curPos());
                    }
                }
             """;
@@ -121,7 +150,7 @@ public class ParserGenerator {
                                 
                 """;
 
-        final String funcDecl = TokenGenerator.substitute(
+        final String funcDecl = substitute(
                 funcDeclTemplate,
                 Map.entry("returnType", d.getType()),
                 Map.entry("funcName", d.getName()),
@@ -153,14 +182,14 @@ public class ParserGenerator {
                 if (unit.isTerminal()) {
 
                     final String checkTemplate = """
-                            check(curToken().token == ${regex}Token.${unit});
+                            check(curToken().token == ${prefix}Token.${unit});
                             var ${unit}${index} = curToken().value;
                             nextToken();
                             """;
                     builder.append(
-                            TokenGenerator.substitute(
+                            substitute(
                                     checkTemplate,
-                                    Map.entry("regex", prefix),
+                                    Map.entry("prefix", prefix),
                                     Map.entry("unit", unit.toString()),
                                     Map.entry("index", String.valueOf(ix))
                             )
@@ -183,7 +212,7 @@ public class ParserGenerator {
 
 
         builder.append("}");
-        builder.append("throw new RuntimeException(\"unknown token\");");
+        builder.append("throw new ParseException(\"unknown token\", analyzer.curPos());");
         builder.append("}");
 
         return builder.toString();
@@ -204,128 +233,5 @@ public class ParserGenerator {
         }
     }
 
-//    private static StringBuilder str = new StringBuilder();
-//    private static String regex;
-//    private static CompilationResult compilationResult;
-
-//    public static String generate(Grammar g, String regex, CompilationResult result) {
-//        str = new StringBuilder();
-//        ParserGenerator.regex = regex;
-//        compilationResult = result;
-//        addHeader();
-//        addBody(g);
-//        addCurToken();
-//        addBottom();
-//        return str.toString();
-//    }
-//
-//    public static void addBody(Grammar g) {
-//        for (var rules : g.rules.entrySet()) {
-//            addRule(rules.getKey(), rules.getValue());
-//        }
-//    }
-//
-//    public static void addRule(Decl d, List<Alternative> alts) {
-//        str.append("public ").append(d.type).append(" ").append(d.name);
-//        str.append("(");
-//        for (int i = 0; i < d.argsNames.size(); ++i) {
-//            str.append(d.argsTypes.get(i)).append(" ").append(d.argsNames.get(i));
-//            if (i != d.argsNames.size() - 1) str.append(", ");
-//        }
-//        str.append(") throws ParseException {\n");
-//        str.append("switch(curToken().token) {");
-//
-//        int ix = 0;
-//
-//        for (var alt : alts) {
-//            var first = calcFirst(d.name, alt.rightSide, compilationResult).stream().toList();
-//
-//            first = first.stream().map(x -> {
-//                if (x.equals("$")) return "END";
-//                return x;
-//            }).toList();
-//
-//            for (int i = 0; i < first.size() - 1; ++i) {
-//                str.append("case ").append(first.get(i)).append(":\n");
-//            }
-//            str.append("case ").append(first.get(first.size() - 1)).append(":\n");
-//
-//
-//            for (int i = 0; i < alt.rightSide.size(); ++i) {
-//                var unit = alt.rightSide.get(i);
-//                var args = alt.args.get(i);
-//                if (unit.isTerminal()) {
-//                    str.append("check(").append("curToken().token == ");
-//                    str.append(regex + "Token.").append(unit).append(");\n");
-//                    str.append("var ").append(unit).append(ix).append(" = curToken().value;");
-//                    str.append("nextToken();");
-//                } else if (unit.isNonTerminal()) {
-//                    str.append("var ").append(unit).append(ix).append(" = ");
-//                    str.append(unit).append("(");
-//                    for (int j = 0; j < args.size(); ++j) {
-//                        str.append(args.get(j));
-//                        if (j != args.size() - 1) str.append(", ");
-//                    }
-//                    str.append(");");
-//                }
-//                ix += 1;
-//            }
-//
-//            str.append(alt.codeBlock);
-//        }
-//
-//
-//        str.append("}");
-//
-//        str.append("throw new RuntimeException(\"unknown token\");");
-//        str.append("}");
-//    }
-
-//    public static void addCurToken() {
-//        str.append("private " + regex + "TokenWrapper ");
-//        str.append("""
-//                curToken() {
-//                    return analyzer.curToken;
-//                }
-//
-//                private void nextToken() throws ParseException {
-//                    analyzer.nextToken();
-//                }
-//
-//                private void check(boolean b) {
-//                        if (!b) {
-//                            throw new RuntimeException("error");
-//                        }
-//                }
-//                """);
-//    }
-//
-//    public static void addBottom() {
-//        str.append("}");
-//    }
-//
-//    public static void addHeader() {
-//        var name = "import static util." + regex + "Util.*;";
-//        str.append(name).append('\n');
-//        str.append("""
-//                import java.text.ParseException;
-//                import java.util.EnumSet;
-//
-//                public class
-//                """);
-//        str.append(" ").append(regex).append("Parser ");
-//        str.append("""
-//                {
-//                    private final
-//                """);
-//        str.append(" ").append(regex).append("LexicalAnalyzer analyzer;\n");
-//        str.append("public ").append(regex).append("Parser(").append(regex).append("LexicalAnalyzer analyzer");
-//        str.append("""
-//                ) throws ParseException {
-//                        this.analyzer = analyzer;
-//                        analyzer.nextToken();
-//                    }
-//                """);
-//    }
 
 }

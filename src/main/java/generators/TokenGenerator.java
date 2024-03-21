@@ -7,15 +7,17 @@ import org.apache.commons.text.StringSubstitutor;
 import java.util.List;
 import java.util.Map;
 
+import static generators.UtilClassGenerator.substitute;
+import static generators.UtilClassGenerator.toPackage;
+
 
 public class TokenGenerator {
 
     public static String generate(
             final Grammar grammar,
-            final String prefix,
-            final String packageStr
+            final StringSubstitutor substitutor
     ) {
-        return new TokenGenerator(grammar, prefix, packageStr).genEnum();
+        return new TokenGenerator(grammar, substitutor).genEnum();
     }
 
     private final Grammar grammar;
@@ -23,16 +25,10 @@ public class TokenGenerator {
 
     private TokenGenerator(
             final Grammar grammar,
-            final String prefix,
-            final String packageStr
+            final StringSubstitutor substitutor
     ) {
         this.grammar = grammar;
-
-        final Map<String, String> parameters = Map.of(
-                "regex", prefix,
-                "package", toPackage(packageStr)
-        );
-        this.substitutor = new StringSubstitutor(parameters);
+        this.substitutor = substitutor;
     }
 
     public String genEnum() {
@@ -68,28 +64,12 @@ public class TokenGenerator {
         );
     }
 
-    public static String substitute(
-            final String template,
-            final Map.Entry<String, String>... variables
-    ) {
-        final Map<String, String> map = Map.ofEntries(variables);
-        return StringSubstitutor.replace(template, map);
-    }
 
-    public static String toPackage(final String packageName) {
-        if (packageName.isEmpty()) return "";
-        return "package " + packageName + ";";
-    }
-
-    public static String withLayer(final String rootPackage, final String layer) {
-        if (rootPackage.isEmpty()) return toPackage(layer);
-        return toPackage(rootPackage + "." + layer);
-    }
 
     private String genHeader() {
         final String headerTemplate = """
                 ${package}
-                public enum ${regex}Token {
+                public enum ${prefix}Token {
            """;
         return substitutor.replace(headerTemplate);
     }
@@ -99,7 +79,7 @@ public class TokenGenerator {
                 
                 public final String regex;
                 
-                ${regex}Token (final String regex) {
+                ${prefix}Token (final String regex) {
                     this.regex = regex;
                 }
                 

@@ -4,6 +4,8 @@ import org.apache.commons.text.StringSubstitutor;
 
 import java.util.Map;
 
+import static generators.UtilClassGenerator.toPackage;
+
 public class LexerGenerator {
 
     private final static String LEXER_TEMPLATE = """
@@ -12,18 +14,18 @@ public class LexerGenerator {
             import java.text.ParseException;
             import java.util.regex.Pattern;
                         
-            public class ${regex}LexicalAnalyzer {
-                public ${regex}TokenWrapper curToken;
+            public class ${prefix}LexicalAnalyzer {
+                public ${prefix}TokenWrapper curToken;
                 private final String stream;
                 private int curPos = 0;
                         
-                public ${regex}LexicalAnalyzer(final String stream) {
+                public ${prefix}LexicalAnalyzer(final String stream) {
                     this.stream = stream;
                 }
                         
                 public void nextToken() throws ParseException {
                     if (curPos >= stream.length()) {
-                        curToken = new ${regex}TokenWrapper("", ${regex}Token.END);
+                        curToken = new ${prefix}TokenWrapper("", ${prefix}Token.END);
                         return;
                     }
                         
@@ -33,37 +35,36 @@ public class LexerGenerator {
                         
                     var tail = stream.substring(curPos);
                         
-                    for (var token: ${regex}Token.values()) {
+                    for (var token: ${prefix}Token.values()) {
                         var matcher = Pattern.compile(token.regex).matcher(tail);
                         if (matcher.lookingAt()) {
                             String head = matcher.group();
                             curPos += head.length();
-                            curToken = new ${regex}TokenWrapper(head, token);
+                            curToken = new ${prefix}TokenWrapper(head, token);
                             return;
                         }
                     }
                     throw new ParseException("Didn't match anything", curPos);
                 }
-               \s
+                
+                public int curPos() {
+                    return curPos;
+                }
             }
             """;
 
     private final StringSubstitutor substitutor;
 
-    private LexerGenerator(final String prefix, final String packageStr) {
-        final Map<String, String> map = Map.of(
-                "regex", prefix,
-                "package", packageStr
-        );
-        this.substitutor = new StringSubstitutor(map);
+    private LexerGenerator(final StringSubstitutor substitutor) {
+        this.substitutor = substitutor;
     }
 
     public String g() {
         return substitutor.replace(LEXER_TEMPLATE);
     }
 
-    public static String gen(final String prefix, final String packageStr) {
-        return new LexerGenerator(prefix, packageStr).g();
+    public static String gen(final StringSubstitutor substitutor) {
+        return new LexerGenerator(substitutor).g();
     }
 
 }
