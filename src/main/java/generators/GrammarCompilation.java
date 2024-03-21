@@ -37,7 +37,7 @@ public class GrammarCompilation {
         while (true) {
             boolean changed = false;
 
-            for (var rule: grammar.getRules()) {
+            for (final Rule rule: grammar.getRules()) {
                 final String ruleName = rule.decl().getName();
                 for (var alternative: rule.alternatives()) {
                     changed |= updateFollow(ruleName, alternative.getRightSide());
@@ -48,10 +48,10 @@ public class GrammarCompilation {
     }
 
     private boolean updateFollow(final String ruleName, final List<Unit> alternative) {
-        boolean updated = false;
+        boolean updatedState = false;
         for (int i = 0; i < alternative.size(); ++i) {
 
-            final var symbol = alternative.get(i);
+            final Unit symbol = alternative.get(i);
             if (!symbol.isNonTerminal()) continue;
 
             final NonTerminal nonTerm = (NonTerminal) symbol;
@@ -61,7 +61,7 @@ public class GrammarCompilation {
             final int currentSize = followSet.size();
 
             final List<Unit> ruleTail = alternative.subList(i + 1, alternative.size());
-            final Set<String> tailFirst = getCurSimpleFirst(ruleTail);
+            final Set<String> tailFirst = calcSimpleFirst(ruleTail);
 
             if (tailFirst.remove(EPS)) {
                 var ruleFollow = followForNon.getOrDefault(ruleName, new HashSet<>());
@@ -69,43 +69,39 @@ public class GrammarCompilation {
             }
 
             followSet.addAll(tailFirst);
-            updated |= (currentSize != followSet.size());
+            updatedState |= (currentSize != followSet.size());
         }
-        return updated;
+        return updatedState;
     }
 
     private void calculateFirstTokens() {
         while (true) {
             boolean stateUpdated = false;
 
-            for (var rule: grammar.getRules()) {
+            for (final Rule rule: grammar.getRules()) {
                 final String ruleName = rule.decl().getName();
-                for (var alt: rule.alternatives()) {
-                    stateUpdated |= updateFirst(ruleName, alt.getRightSide());
+                for (final var alternative: rule.alternatives()) {
+                    stateUpdated |= updateFirst(ruleName, alternative.getRightSide());
                 }
             }
             if (!stateUpdated) break;
         }
     }
 
-    private boolean updateFirst(final String A, final List<Unit> alpha) {
-        Set<String> simpleFirst = getCurSimpleFirst(alpha);
-        Set<String> fullFirst = firstForNon.get(A);
-        if (fullFirst == null) {
-            firstForNon.put(A, simpleFirst);
-            return true;
-        } else {
-            int size = fullFirst.size();
-            fullFirst.addAll(simpleFirst);
-            return fullFirst.size() != size;
-        }
+    private boolean updateFirst(final String ruleName, final List<Unit> alternative) {
+        final Set<String> simpleFirst = calcSimpleFirst(alternative);
+
+        final Set<String> firstSet = firstForNon.computeIfAbsent(ruleName, k -> new HashSet<>());
+        final int initSize = firstSet.size();
+        firstSet.addAll(simpleFirst);
+        return initSize != firstSet.size();
     }
 
-    private Set<String> getCurSimpleFirst(final List<Unit> alpha) {
-        return getSimpleFirst(alpha, firstForNon);
+    private Set<String> calcSimpleFirst(final List<Unit> alternative) {
+        return calcSimpleFirstForMap(alternative, firstForNon);
     }
 
-    public static Set<String> getSimpleFirst(
+    public static Set<String> calcSimpleFirstForMap(
             final List<Unit> alpha,
             final Map<String, Set<String>> first
     ) {
@@ -120,7 +116,7 @@ public class GrammarCompilation {
             forHead = new HashSet<>(forHead);
             if (forHead.contains("eps")) {
                 forHead.remove("eps");
-                Set<String> forTail = getSimpleFirst(alpha.subList(1, alpha.size()), first);
+                Set<String> forTail = calcSimpleFirstForMap(alpha.subList(1, alpha.size()), first);
                 forHead.addAll(forTail);
             } else {
                 forHead.remove("eps");
@@ -139,8 +135,8 @@ public class GrammarCompilation {
                     var alpha = declListEntry.alternatives().get(i).getRightSide();
                     var beta = declListEntry.alternatives().get(j).getRightSide();
 
-                    var alphaFirst = getCurSimpleFirst(alpha);
-                    var betaFirst = getCurSimpleFirst(beta);
+                    var alphaFirst = calcSimpleFirst(alpha);
+                    var betaFirst = calcSimpleFirst(beta);
 
                     var x = new HashSet<>(alphaFirst);
                     x.retainAll(betaFirst);

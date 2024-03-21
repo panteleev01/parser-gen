@@ -22,6 +22,6 @@ public class CompilationResult {
     }
 
     public Set<String> simple(final List<Unit> alpha) {
-        return GrammarCompilation.getSimpleFirst(alpha, firstForNon);
+        return GrammarCompilation.calcSimpleFirstForMap(alpha, firstForNon);
     }
 }
