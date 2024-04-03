@@ -12,10 +12,9 @@ public class ExpressionTokenWrapper {
     @Override
     public String toString() {
         return "ExpressionTokenWrapper{" +
-                "value='" + value + '\'' +
+                "value=" + value +
                 ", token=" + token +
-                '}';
+                "}";
     }
-
 }
 

@@ -12,7 +12,9 @@ import parser.GrammarVisitor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 import static generators.UtilClassGenerator.toPackage;
 
@@ -51,12 +53,12 @@ public class Main {
     }
 
     public static void create(
-            final Path grammarPath,
+            final String grammarPath,
             final String dirPath,
             final String packageStr,
             final String prefix
     ) throws IOException {
-        final Grammar g = parseGrammar(grammarPath);
+        final Grammar g = parseGrammar(Path.of(grammarPath));
 
         final CompilationResult result = GrammarCompilation.compile(g);
 
@@ -83,20 +85,41 @@ public class Main {
     }
 
     public static void createExpression() throws IOException {
-        final Path grammarPath = Path.of("src/test/java/expression/exprGrammar.txt");
+        final String grammarPath = "src/test/java/expression/exprGrammar.txt";
         final String sourcesPath = "result/expression/";
         create(grammarPath, sourcesPath, "", "Expression");
     }
 
     public static void createLambda() throws IOException {
-        final Path grammarPath = Path.of("src/test/java/lambda/lambdaGrammar.txt");
+        final String grammarPath = "src/test/java/lambda/lambdaGrammar.txt";
         final String sourcesPath = "result/lambda/";
         create(grammarPath, sourcesPath, "", "Lambda");
     }
 
-    public static void main(final String[] args) throws IOException {
+    public static void createTestParsers() throws IOException {
         createExpression();
         createLambda();
+    }
+
+    public static void main(final String[] args) throws IOException {
+        if (args.length != 4) {
+            throw new IllegalArgumentException("Main expected 4 arguments");
+        }
+
+        if (Arrays.stream(args).anyMatch(Objects::isNull)) {
+            throw new IllegalArgumentException("One of the passed arguments is null");
+        }
+
+        final String grammarPath = args[0];
+        final String sourcesPath = args[1];
+        final String packageStr = args[2];
+        final String classPrefix = args[3];
+
+        try {
+            create(grammarPath, sourcesPath, packageStr, classPrefix);
+        } catch (final IOException e) {
+            throw new IOException("IO exception while creating files: ", e);
+        }
     }
 
 }

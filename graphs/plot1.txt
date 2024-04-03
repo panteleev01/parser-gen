@@ -1,5 +1,5 @@
-graph G {ID58261177393 [label="lambda"]
-args [label="args"]ID80550554883 [label="10"]
-ID58261177393 -- args
-ID58261177393 -- ID80550554883
+graph G {ID1425069738 [label="lambda"]
+args [label="args"]ID30196031583 [label="10"]
+ID1425069738 -- args
+ID1425069738 -- ID30196031583
 }

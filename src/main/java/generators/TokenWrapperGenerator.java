@@ -1,12 +1,7 @@
 package generators;
 
-import grammar.Grammar;
+
 import org.apache.commons.text.StringSubstitutor;
-
-import java.util.Map;
-
-import static generators.UtilClassGenerator.toPackage;
-
 
 public class TokenWrapperGenerator {
 
@@ -25,11 +20,10 @@ public class TokenWrapperGenerator {
                 @Override
                 public String toString() {
                     return "${prefix}TokenWrapper{" +
-                            "value='" + value + '\\'' +
+                            "value=" + value +
                             ", token=" + token +
-                            '}';
+                            "}";
                 }
-                
             }
             
             """;

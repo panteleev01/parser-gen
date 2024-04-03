@@ -12,10 +12,9 @@ public class LambdaTokenWrapper {
     @Override
     public String toString() {
         return "LambdaTokenWrapper{" +
-                "value='" + value + '\'' +
+                "value=" + value +
                 ", token=" + token +
-                '}';
+                "}";
     }
-
 }
 
